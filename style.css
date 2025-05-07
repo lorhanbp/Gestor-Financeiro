@@ -1,0 +1,1010 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --danger-color: #F44336;
+    --success-color: #4CAF50;
+    --warning-color: #FFC107;
+    --dark-color: #333;
+    --light-color: #f4f4f4;
+    --sidebar-width: 250px;
+    --header-height: 60px;
+    --text-color: #333;
+    --text-muted: #666;
+    --border-color: #ddd;
+}
+
+[data-theme="dark"] {
+    --primary-color: #43aa8b;
+    --secondary-color: #3a86ff;
+    --danger-color: #F44336;
+    --success-color: #43aa8b;
+    --warning-color: #ffb300;
+    --dark-color: #23272f;
+    --light-color: #2c2f36;
+    --text-color: #fff;
+    --text-muted: #888;
+    --border-color: #444;
+}
+
+[data-theme="dark"] body {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .section {
+    background-color: var(--light-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .card {
+    background-color: var(--light-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .data-table th,
+[data-theme="dark"] .data-table td {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .data-table th {
+    background-color: var(--dark-color);
+}
+
+[data-theme="dark"] .btn {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--light-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .report-card,
+[data-theme="dark"] .setting-card {
+    background-color: var(--light-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .switch .slider {
+    background-color: var(--border-color);
+}
+
+[data-theme="dark"] .switch input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+[data-theme="dark"] .dashboard-extract {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .dashboard-extract-title {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .dashboard-extract-item {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .chart-container {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .sidebar {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .sidebar nav ul li a {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .sidebar nav ul li.active a,
+[data-theme="dark"] .sidebar nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .header-content {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .user-info {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] #userEmail {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .card-icon {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .card-info h3 {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .amount {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .amount.income {
+    color: var(--success-color);
+}
+
+[data-theme="dark"] .amount.expense {
+    color: var(--danger-color);
+}
+
+[data-theme="dark"] .amount.balance {
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .amount.reserve {
+    color: var(--warning-color);
+}
+
+[data-theme="dark"] .card-reserve {
+    background: linear-gradient(135deg, #ffb300, #ff8f00);
+}
+
+[data-theme="dark"] .card-variable-income {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+}
+
+[data-theme="dark"] .card-icon.variable-income {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9c27b0;
+}
+
+[data-theme="dark"] .amount.variable-income {
+    color: #9c27b0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+body.dark-mode, .dark-mode body {
+    background: #23272f;
+    color: #f4f4f4;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--dark-color);
+    color: white;
+    padding: 1rem;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.logo-img {
+    width: 40px;
+    height: 40px;
+    margin-right: 1rem;
+    border-radius: 50%;
+}
+
+.sidebar nav ul {
+    list-style: none;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar nav ul li a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar nav ul li a i {
+    margin-right: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar nav ul li.active a,
+.sidebar nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 1rem;
+}
+
+header {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+/* Section Styles */
+.section {
+    display: none;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.section.active {
+    display: block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* Card Styles */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background-color: #23272f;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    border-top: 4px solid #43aa8b;
+    position: relative;
+    min-height: 110px;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.1rem;
+    font-size: 1.7rem;
+    background: #222;
+}
+
+.card-icon.income {
+    color: #43aa8b;
+    background: rgba(67,170,139,0.08);
+}
+
+.card-icon.expense {
+    color: #F44336;
+    background: rgba(244,67,54,0.08);
+}
+
+.card-icon.balance {
+    color: #3a86ff;
+    background: rgba(58,134,255,0.08);
+}
+
+.card-icon.reserve {
+    color: #ffb300;
+    background: rgba(255,179,0,0.08);
+}
+
+.card-icon.variable-income {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9c27b0;
+}
+
+.card-info h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: #f4f4f4;
+    font-weight: bold;
+}
+
+.amount {
+    font-size: 1.7rem;
+    font-weight: bold;
+    margin-top: 0.2rem;
+}
+
+.card-income { border-top-color: #43aa8b; }
+.card-expense { border-top-color: #F44336; }
+.card-balance { border-top-color: #3a86ff; }
+.card-reserve { border-top-color: #ffb300; }
+.card-variable-income { border-top-color: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+
+.amount.income { color: #43aa8b; }
+.amount.expense { color: #F44336; }
+.amount.balance { color: #3a86ff; }
+.amount.reserve { color: #ffb300; }
+.amount.variable-income { color: #9c27b0; }
+
+/* Chart Container */
+.chart-container {
+    background-color: #23272f;
+    padding: 1.5rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.chart-container canvas#categoryPieChart {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Table Styles */
+.table-container {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.data-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+    text-align: left;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+    text-align: center;
+}
+
+.data-table td {
+    color: #212529;
+}
+
+.data-table tr:hover {
+    background: #f8f9fa;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table .btn-action {
+    padding: 0.25rem 0.5rem;
+    margin: 0 0.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.2s;
+}
+
+.data-table .btn-action:hover {
+    color: #495057;
+}
+
+.data-table .check-paid-variable {
+    margin-right: 0.5rem;
+}
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+    text-align: center;
+    min-width: 90px;
+}
+
+.data-table th,
+.data-table td {
+    white-space: nowrap;
+}
+
+/* Button Styles */
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #0b7dda;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #da190b;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Reports Grid */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.report-card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.report-card h3 {
+    margin-bottom: 1rem;
+}
+
+/* Settings Grid */
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.setting-card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.setting-card h3 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.setting-card h3 i {
+    margin-right: 0.5rem;
+}
+
+.setting-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+        padding: 0.5rem;
+    }
+
+    .sidebar .logo h1,
+    .sidebar nav ul li a span {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 60px;
+    }
+
+    .dashboard-grid,
+    .reports-grid,
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Gráficos em tema escuro */
+body.dark-mode .chart-container, .dark-mode .chart-container {
+    background: #23272f;
+    color: #f4f4f4;
+}
+
+/* Legenda do gráfico de pizza */
+body.dark-mode .chartjs-legend li, .dark-mode .chartjs-legend li {
+    font-size: 1.1em !important;
+    color: #fff !important;
+}
+
+.chartjs-legend li span, .chartjs-legend li, .chartjs-legend li * {
+    color: #fff !important;
+    fill: #fff !important;
+}
+
+/* Estilos específicos para a legenda do gráfico de pizza */
+#categoryPieChart + .chartjs-legend {
+    color: #fff !important;
+}
+
+#categoryPieChart + .chartjs-legend li {
+    color: #fff !important;
+}
+
+#categoryPieChart + .chartjs-legend li span {
+    color: #fff !important;
+}
+
+#categoryPieChart + .chartjs-legend li * {
+    color: #fff !important;
+}
+
+.pie-custom-legend {
+    position: absolute;
+    top: 30px;
+    right: 10px;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+    z-index: 2;
+}
+.pie-custom-legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7em;
+    font-size: 1.1em;
+    color: #ccc;
+    line-height: 1.1;
+}
+.pie-custom-legend-color {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.pie-custom-legend-label {
+    font-weight: 500;
+    color: #ccc;
+}
+.pie-custom-legend-percent {
+    display: block;
+    color: #fff;
+    font-size: 1.05em;
+    font-weight: bold;
+    margin-top: 2px;
+}
+
+[data-theme="dark"] header {
+    background-color: var(--dark-color);
+    color: var(--text-color);
+}
+
+/* Filtro de datas do dashboard */
+.styled-filter {
+    background: #23272f;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    padding: 0.7em 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 1.5em;
+    margin-bottom: 1.2em;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+.styled-filter .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+.styled-filter label {
+    color: #fff;
+    font-weight: 500;
+    font-size: 1em;
+    margin-bottom: 0.2em;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+.styled-filter input[type="date"] {
+    background: #fff;
+    color: #222;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 0.35em 0.7em;
+    font-size: 1em;
+    outline: none;
+    transition: border 0.2s;
+}
+.styled-filter input[type="date"]:focus {
+    border: 1.5px solid #43aa8b;
+}
+.styled-filter .btn-secondary {
+    margin-top: 1.2em;
+    height: 38px;
+    font-size: 1em;
+    font-weight: 500;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+@media (max-width: 900px) {
+    .styled-filter {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.7em;
+        padding: 1em;
+    }
+    .styled-filter .btn-secondary {
+        margin-top: 0.5em;
+        width: 100%;
+    }
+}
+
+[data-theme="dark"] .styled-filter input[type="date"] {
+    background: #fff;
+    color: #222;
+    border: 1px solid #444;
+}
+
+.dashboard-variable-income {
+    background: #23272f;
+    border-radius: 8px;
+    margin: 2rem 0 1rem 0;
+    padding: 1.5rem 1rem;
+    min-height: 80px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    color: #fff;
+}
+.dashboard-variable-income-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.7rem;
+    color: #fff;
+}
+.dashboard-variable-income-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+.dashboard-variable-income-table th,
+.dashboard-variable-income-table td {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+.dashboard-variable-income-table th {
+    color: #43aa8b;
+    font-weight: 600;
+    background: none;
+}
+.dashboard-variable-income-total {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #43aa8b;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-clickable {
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.1s;
+}
+.dashboard-clickable:hover {
+    box-shadow: 0 4px 16px rgba(67,170,139,0.15);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.sidebar-reserve-card {
+    background: #23272f;
+    color: #ffb300;
+    border-radius: 7px;
+    margin-bottom: 0.7em;
+    padding: 0.7em 1em;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    border-left: 5px solid #ffb300;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+.sidebar-reserve-card:hover {
+    box-shadow: 0 4px 16px rgba(255,179,0,0.15);
+    border-left: 5px solid #43aa8b;
+}
+.sidebar-reserve-card-title {
+    font-weight: bold;
+    font-size: 1.05em;
+    margin-bottom: 0.2em;
+}
+.sidebar-reserve-card-value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+}
+.sidebar-reserve-card-desc {
+    font-size: 0.95em;
+    color: #bbb;
+    margin-top: 0.1em;
+}
+
+/* Estilos para a tabela de lembretes */
+.lembrete-container {
+    background: #23272f !important;
+    min-height: 340px !important;
+    max-width: 50% !important;
+    width: 100% !important;
+    border-radius: 12px !important;
+    padding: 18px 10px 10px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    max-height: 400px !important;
+    overflow-y: auto !important;
+}
+
+.lembrete-container h3 {
+    color: #fff !important;
+    margin-bottom: 12px !important;
+    font-size: 1.1em !important;
+}
+
+#lembreteTable {
+    width: 100% !important;
+    background: transparent !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-size: 0.97em !important;
+}
+
+#lembreteTable th {
+    text-align: left !important;
+    padding: 6px !important;
+    color: #ccc !important;
+    font-weight: 500 !important;
+    border-bottom: 1px solid #2c2f36 !important;
+}
+
+#lembreteTable td {
+    padding: 8px 6px !important;
+    border-bottom: 1px solid #2c2f36 !important;
+}
+
+#lembreteTable tr:hover {
+    background: #2c2f36 !important;
+}
+
+#lembreteTable tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Alinhamento de colunas de data nas tabelas */
+.data-table td:nth-child(5),
+#lembreteTable td:nth-child(4),
+#dashboardExtract td:nth-child(5) {
+    text-align: center !important;
+}
+
+.data-table th:nth-child(5),
+#lembreteTable th:nth-child(4),
+#dashboardExtract th:nth-child(5) {
+    text-align: center !important;
+}

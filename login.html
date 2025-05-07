@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestor Financeiro</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    .support-section {
+        text-align: center;
+        margin: 0 auto;
+        max-width: 400px;
+        padding: 20px 0;
+    }
+    .support-section h3 {
+        margin-bottom: 10px;
+    }
+    .support-section p {
+        margin-bottom: 8px;
+    }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="assets/images/logo.png" alt="Logo Gestor Financeiro">
+            </div>
+            <h2>Gestor Financeiro</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required placeholder="Digite seu e-mail">
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="Digite sua senha">
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+                <div id="loginError" class="login-error"></div>
+            </form>
+            <div class="support-section">
+                <h3>Suporte e Contato</h3>
+                <p><strong>E-mail:</strong> suporte.gestorfinanceiro@gmail.com</p>
+                <p><strong>Telefone:</strong> +55 (11) 97820-6586</p>
+                <p>Estamos à disposição para atendê-lo. Entre em contato conosco por e-mail ou telefone para quaisquer dúvidas ou suporte necessário.</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>

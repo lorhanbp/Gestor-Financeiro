@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Financeiro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="assets/images/logo.png" alt="Logo" class="logo-img">
+                <h1>Gestor Financeiro</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active"><a href="#dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li><a href="#transactions"><i class="fas fa-exchange-alt"></i> Transações</a></li>
+                    <li><a href="#variableIncome"><i class="fas fa-users"></i> Receita Variável</a></li>
+                    <li><a href="#fixedDebts"><i class="fas fa-file-invoice-dollar"></i> Despesas Fixas</a></li>
+                    <li><a href="#reports"><i class="fas fa-file-alt"></i> Relatórios</a></li>
+                    <li><a href="#settings"><i class="fas fa-cog"></i> Configurações</a></li>
+                
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="header-content">
+                    <h2 id="currentSection">Dashboard</h2>
+                    <div class="user-info" id="userInfo" style="display: flex; align-items: center; gap: 10px;">
+                        <div id="userAvatar" style="width:36px;height:36px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1.1em;color:#666;"></div>
+                        <span style="font-weight:bold;" id="userName"></span>
+                        <span id="userEmail" style="font-size:0.95em;color:#888;margin-left:4px;"></span>
+                        <button id="logoutBtn" class="btn btn-danger" style="margin-left:10px;">Sair</button>
+                        <button id="editNameBtn" class="btn btn-secondary" style="margin-left:5px;">Alterar Nome</button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+                <section id="dashboardSection" class="section active">
+                    <div class="dashboard-grid">
+                        <div class="card card-income dashboard-clickable" id="cardIncome">
+                            <div class="card-icon income">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Receitas</h3>
+                                <p class="amount income" id="dashboardIncome">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="card card-expense dashboard-clickable" id="cardExpense">
+                            <div class="card-icon expense">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Despesas</h3>
+                                <p class="amount expense" id="dashboardExpense">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="card card-balance dashboard-clickable" id="cardBalance">
+                            <div class="card-icon balance">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Saldo</h3>
+                                <p class="amount balance" id="dashboardBalance">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="card card-reserve dashboard-clickable" id="cardReserve">
+                            <div class="card-icon reserve">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Reserva</h3>
+                                <p class="amount reserve" id="dashboardReserve">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="card card-variable-income dashboard-clickable" id="cardVariableIncome">
+                            <div class="card-icon variable-income">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Receita Variável</h3>
+                                <p class="amount variable-income" id="dashboardVariableIncome">R$ 0,00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="charts-grid" style="display: flex; gap: 18px;">
+                        <div class="chart-container" style="position:relative; flex:1; min-width:320px; max-width:50%;">
+                            <button id="openCalendarFilter" style="position:absolute; top:10px; left:10px; background: none; border: none; cursor: pointer; color: #fff; font-size: 1.2em; z-index: 11; padding: 4px; border-radius: 50%; transition: background 0.2s;">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                            <div id="calendarFilterPopup" style="display:none; position:absolute; left:40px; top:10px; z-index:12; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.15); border-radius:8px; padding:16px;"></div>
+                            <canvas id="categoryPieChart"></canvas>
+                            <div id="pieCustomLegend" class="pie-custom-legend"></div>
+                        </div>
+                        <div class="lembrete-container" style="background:#23272f; min-height:340px; max-width:50%; width:100%; border-radius:12px; padding:18px 10px 10px 10px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;">
+                            <h3 style="color:#fff; margin-bottom:12px; font-size:1.1em;">Lembretes de Vencimento</h3>
+                            <table id="lembreteTable" style="width:100%; background:transparent; color:#fff; border-radius:8px; font-size:0.97em;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left; padding:6px;">Tipo</th>
+                                        <th style="text-align:left; padding:6px;">Descrição</th>
+                                        <th style="text-align:left; padding:6px;">Valor</th>
+                                        <th style="text-align:left; padding:6px;">Vencimento</th>
+                                        <th style="text-align:left; padding:6px;">Dias</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lembreteTableBody">
+                                    <!-- Conteúdo dinâmico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="dashboardExtract" class="dashboard-extract">
+                        <h3 style="color:#fff; margin-bottom:10px; font-size:1.1em;">Extrato Financeiro</h3>
+                        <table style="width:100%; color:#fff; background:transparent; border-radius:8px; font-size:1em;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left; padding:6px;">Tipo</th>
+                                    <th style="text-align:left; padding:6px;">Descrição</th>
+                                    <th style="text-align:left; padding:6px;">Categoria</th>
+                                    <th style="text-align:left; padding:6px;">Valor</th>
+                                    <th style="text-align:left; padding:6px;">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboardExtractBody">
+                                <!-- Conteúdo dinâmico -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="transactionsSection" class="section">
+                    <div class="section-header">
+                        <h2>Transações</h2>
+                        <button class="btn btn-primary" id="addTransactionBtn">
+                            <i class="fas fa-plus"></i> Nova Transação
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                    <th>Descrição</th>
+                                    <th>Categoria</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="text-align:right; margin-top: 10px;">
+                        <button class="btn btn-secondary" id="exportTransacoesBtn">
+                            <i class="fas fa-download"></i> Exportar Relatório
+                        </button>
+                    </div>
+                </section>
+
+                <section id="accountsSection" class="section">
+                    <div class="section-header">
+                        <h2>Reserva</h2>
+                        <button class="btn btn-primary" id="addReserveBtn">
+                            <i class="fas fa-plus"></i> Adicionar Valor
+                        </button>
+                    </div>
+                    <div style="margin-bottom: 1em; font-weight: bold; color: #555;">
+                        Caixas disponíveis: SANTANDER, ITAU, MERCADO PAGO, RECARGA PAY
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Caixa</th>
+                                    <th>Valor</th>
+                                    <th>Descrição</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reserveTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="reportsSection" class="section">
+                    <h2>Relatórios</h2>
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <h3>Resumo Financeiro</h3>
+                            <div class="report-content">
+                                <p>Receitas totais: <span class="text-success">R$ 0,00</span></p>
+                                <p>Despesas totais: <span class="text-danger">R$ 0,00</span></p>
+                                <p>Saldo: <span class="text-primary">R$ 0,00</span></p>
+                            </div>
+                        </div>
+                        <div class="report-card">
+                            <h3>Exportar Dados</h3>
+                            <div class="report-content">
+                                <button class="btn btn-secondary">
+                                    <i class="fas fa-download"></i> Exportar Relatório
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="settingsSection" class="section">
+                    <h2>Configurações</h2>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3><i class="fas fa-palette"></i> Tema</h3>
+                            <div class="setting-content">
+                                <label class="switch">
+                                    <input type="checkbox" id="themeToggle">
+                                    <span class="slider round"></span>
+                                </label>
+                                <span>Modo Escuro</span>
+                            </div>
+                        </div>
+                        <div class="setting-card">
+                            <h3><i class="fas fa-bell"></i> Notificações</h3>
+                            <div class="setting-content">
+                                <label class="switch">
+                                    <input type="checkbox" id="notificationsToggle">
+                                    <span class="slider round"></span>
+                                </label>
+                                <span>Ativar Notificações</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="variableIncomeSection" class="section">
+                    <div class="section-header">
+                        <h2>Receita Variável</h2>
+                        <button class="btn btn-primary" id="addVariableIncomeBtn">
+                            <i class="fas fa-plus"></i> Nova Receita
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Valor Total</th>
+                                    <th>Valor Parcela</th>
+                                    <th>Parcelas</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor Atualizado</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="variableIncomeTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="text-align:right; margin-top: 10px;">
+                        <button class="btn btn-secondary" id="exportReceitaVariavelBtn">
+                            <i class="fas fa-download"></i> Exportar Relatório
+                        </button>
+                    </div>
+                </section>
+
+                <section id="fixedDebtsSection" class="section">
+                    <div class="section-header">
+                        <h2>Despesas Fixas</h2>
+                        <button class="btn btn-primary" id="addFixedDebtBtn">
+                            <i class="fas fa-plus"></i> Nova Despesa
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Valor</th>
+                                    <th>Data de Vencimento</th>
+                                    <th>Situação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fixedDebtsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="text-align:right; margin-top: 10px;">
+                        <button class="btn btn-secondary" id="exportDespesasFixasBtn">
+                            <i class="fas fa-download"></i> Exportar Relatório
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
