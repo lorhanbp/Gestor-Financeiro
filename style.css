@@ -374,11 +374,25 @@ header {
     margin-top: 0.2rem;
 }
 
-.card-income { border-top-color: #43aa8b; }
-.card-expense { border-top-color: #F44336; }
-.card-balance { border-top-color: #3a86ff; }
-.card-reserve { border-top-color: #ffb300; }
-.card-variable-income { border-top-color: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.card-income {
+    border-top-color: #43aa8b;
+}
+
+.card-expense {
+    border-top-color: #F44336;
+}
+
+.card-balance {
+    border-top-color: #3a86ff;
+}
+
+.card-reserve {
+    border-top-color: #ffb300;
+}
+
+.card-variable-income {
+    border-top-color: #9c27b0;
+}
 
 .amount.income { color: #43aa8b; }
 .amount.expense { color: #F44336; }
@@ -545,11 +559,13 @@ header {
 }
 
 .modal-content {
-    background-color: white;
+    background-color: #23272f;
     padding: 2rem;
-    border-radius: 5px;
+    border-radius: 10px;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .modal-header {
@@ -557,6 +573,12 @@ header {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    color: #fff;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
 .close-modal {
@@ -564,6 +586,7 @@ header {
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
+    color: #fff;
 }
 
 /* Form Styles */
@@ -574,6 +597,7 @@ header {
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
+    color: #fff;
 }
 
 .form-group input,
@@ -1007,4 +1031,62 @@ body.dark-mode .chartjs-legend li, .dark-mode .chartjs-legend li {
 #lembreteTable th:nth-child(4),
 #dashboardExtract th:nth-child(5) {
     text-align: center !important;
+}
+
+/* Estilos para o modal de detalhes */
+.details-list {
+    padding: 1rem;
+}
+
+.details-list h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 1rem 0 0.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.details-list h3:first-child {
+    margin-top: 0;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    background: #2a2f3a;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.detail-description {
+    flex: 1;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.detail-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin: 0 1rem;
+}
+
+.detail-value.income {
+    color: #43aa8b;
+}
+
+.detail-value.expense {
+    color: #F44336;
+}
+
+.detail-value.reserve {
+    color: #ffb300;
+}
+
+.detail-date {
+    color: #888;
+    font-size: 0.9rem;
+    min-width: 100px;
+    text-align: right;
 }

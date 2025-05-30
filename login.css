@@ -1,10 +1,15 @@
 body {
     background: #f4f4f4;
+    background-image: url('https://static.wixstatic.com/media/6b36fa_0394ddbdbf554889ba45e87e6dadefea~mv2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Open Sans', sans-serif;
 }
 .login-container {
     width: 100vw;
@@ -15,10 +20,11 @@ body {
 }
 .login-card {
     background: #fff;
-    padding: 2.5rem 2rem;
+    padding: 1.8rem;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(44, 62, 80, 0.2);
-    width: 350px;
+    width: 450px;
+    max-width: 95%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -26,7 +32,7 @@ body {
 .login-logo {
     width: 60px;
     height: 60px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -38,24 +44,34 @@ body {
     object-fit: cover;
 }
 h2 {
-    margin-bottom: 2rem;
+    margin-bottom: 1.2rem;
     color: #333;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+#loginForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
 }
 .form-group {
-    width: 100%;
-    margin-bottom: 1.2rem;
+    width: 93%;
+    align-items: center;
+    margin-bottom: 0.8rem;
 }
 label {
     display: block;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
     color: #555;
+    font-size: 0.95rem;
 }
 input[type="email"], input[type="password"] {
     width: 100%;
-    padding: 0.7rem;
+    padding: 1rem;
     border: 1px solid #ddd;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     outline: none;
     transition: border 0.2s;
 }
@@ -65,14 +81,14 @@ input[type="email"]:focus, input[type="password"]:focus {
 .btn-login {
     width: 100%;
     padding: 0.8rem;
-    background: #43aa8b;
+    background: #19428fa2;
     color: #fff;
     border: none;
     border-radius: 6px;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
     transition: background 0.2s;
 }
 .btn-login:hover {
@@ -80,8 +96,66 @@ input[type="email"]:focus, input[type="password"]:focus {
 }
 .login-error {
     color: #e63946;
-    margin-top: 1rem;
-    font-size: 0.95rem;
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
     text-align: center;
     min-height: 1.2em;
-} 
+}
+
+.register-section {
+    text-align: center;
+    margin: 0.3rem 0;
+    gap: 0.01rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid #eee;
+}
+
+.register-section p {
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.btn-register {
+    background: none;
+    border: 2px solid #43aa8b;
+    color: #43aa8b;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-register:hover {
+    background: #43aa8b;
+    color: #fff;
+}
+
+.support-section {
+    text-align: center;
+    margin: 0.8rem auto;
+    max-width: 400px;
+    padding: 10px 0;
+}
+
+.form-options {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.forgot-password {
+    color: #43aa8b;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-password:hover {
+    color: #3a86ff;
+    text-decoration: underline;
+}

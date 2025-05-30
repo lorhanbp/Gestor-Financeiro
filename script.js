@@ -140,54 +140,91 @@ function getDashboardDataBase(transactions = state.transactions) {
 // Função final do dashboard, integrando dívidas fixas
 function getDashboardData(transactions = state.transactions) {
     let data = getDashboardDataBase(transactions);
+
     // Somar dívidas fixas não pagas às despesas
     if (state.fixedDebts && state.fixedDebts.length > 0) {
-        // Adiciona ao total de despesas
-        const totalFixas = state.fixedDebts.filter(d => !d.paid).reduce((sum, d) => sum + d.value, 0);
-        data.expenses += totalFixas;
-        // Adiciona ao gráfico de pizza (categoria Dívidas Fixas)
-        const idx = data.categoryData.findIndex(c => c.name === 'Dívidas Fixas');
-        if (idx >= 0) {
-            data.categoryData[idx].amount += totalFixas;
-        } else if (totalFixas > 0) {
-            data.categoryData.push({ name: 'Dívidas Fixas', amount: totalFixas, color: '#e74c3c' });
-        }
-        // Adiciona ao fluxo mensal (mês de vencimento)
-        state.fixedDebts.filter(d => !d.paid).forEach(d => {
-            if (d.dueDate) {
-                const [ano, mes] = d.dueDate.split('-');
-                const key = `${mes}/${ano.slice(2)}`;
-                let found = false;
-                for (let m of data.monthlyData) {
-                    if (m.month === key) {
-                        m.expenses += d.value;
-                        found = true;
-                        break;
+        const totalFixasPendentes = state.fixedDebts.filter(d => !d.paid);
+        if (totalFixasPendentes.length > 0) {
+             // Adiciona ao total de despesas
+            const valorTotalFixasPendentes = totalFixasPendentes.reduce((sum, d) => sum + d.value, 0);
+            data.expenses += valorTotalFixasPendentes;
+            // Adiciona ao gráfico de pizza (categoria Dívidas Fixas)
+            const idxDespesasFixas = data.categoryData.findIndex(c => c.name === 'Dívidas Fixas');
+            if (idxDespesasFixas >= 0) {
+                data.categoryData[idxDespesasFixas].amount += valorTotalFixasPendentes;
+            } else if (valorTotalFixasPendentes > 0) {
+                data.categoryData.push({ name: 'Dívidas Fixas', amount: valorTotalFixasPendentes, color: '#e74c3c' });
+            }
+            // Adiciona ao fluxo mensal (mês de vencimento)
+            totalFixasPendentes.forEach(d => {
+                if (d.dueDate) {
+                    const [ano, mes] = d.dueDate.split('-');
+                    const key = `${mes}/${ano.slice(2)}`;
+                    let monthlyEntry = data.monthlyData.find(m => m.month === key);
+                    if (!monthlyEntry) {
+                         monthlyEntry = { month: key, income: 0, expenses: 0, reserve: 0 };
+                         data.monthlyData.push(monthlyEntry);
+                         // Reordenar para garantir que os meses estejam em ordem (opcional, mas bom)
+                         data.monthlyData.sort((a, b) => {
+                             const [m1, y1] = a.month.split('/').map(Number);
+                             const [m2, y2] = b.month.split('/').map(Number);
+                             return (y1 + m1 / 100) - (y2 + m2 / 100);
+                         });
                     }
+                    monthlyEntry.expenses += d.value;
                 }
-                if (!found) {
-                    data.monthlyData.push({ month: key, income: 0, expenses: d.value, reserve: 0 });
-                }
-            }
-        });
+            });
+        }
     }
-    // Calcular o valor recebido da renda variável (apenas valor da parcela paga)
-    let totalRendaVariavelRecebida = 0;
+
+    // Processar receitas variáveis pagas para incluir nos gráficos
     if (state.variableIncome && state.variableIncome.length > 0) {
-        state.variableIncome.forEach(item => {
-            if (item.paid) {
-                if (item.installmentValue) {
-                    totalRendaVariavelRecebida += item.installmentValue;
-                } else if (item.totalValue) {
-                    totalRendaVariavelRecebida += item.totalValue;
-                }
+        const receitasVariaveisPagas = state.variableIncome.filter(item => item.paid);
+        if (receitasVariaveisPagas.length > 0) {
+            const totalRendaVariavelRecebida = receitasVariaveisPagas.reduce((sum, item) => sum + (item.installmentValue > 0 ? item.installmentValue : 0), 0);
+
+            // Adiciona ao total de receita
+            data.income += totalRendaVariavelRecebida;
+
+            // Adiciona ao gráfico de pizza (categoria Receita Variável Recebida)
+            const idxRendaVariavel = data.categoryData.findIndex(c => c.name === 'Receita Variável Recebida');
+            if (idxRendaVariavel >= 0) {
+                data.categoryData[idxRendaVariavel].amount += totalRendaVariavelRecebida;
+            } else if (totalRendaVariavelRecebida > 0) {
+                // Usar a cor roxa do card
+                data.categoryData.push({ name: 'Receita Variável Recebida', amount: totalRendaVariavelRecebida, color: '#9c27b0' });
             }
-        });
+
+            // Adiciona ao fluxo mensal (mês de vencimento de cada parcela/total)
+            receitasVariaveisPagas.forEach(item => {
+                 if (item.dueDate) {
+                    const [ano, mes] = item.dueDate.split('-');
+                    const key = `${mes}/${ano.slice(2)}`;
+                    const valorRecebido = item.installmentValue > 0 ? item.installmentValue : 0;
+
+                    let monthlyEntry = data.monthlyData.find(m => m.month === key);
+                    if (!monthlyEntry) {
+                         monthlyEntry = { month: key, income: 0, expenses: 0, reserve: 0 };
+                         data.monthlyData.push(monthlyEntry);
+                         // Reordenar para garantir que os meses estejam em ordem (opcional, mas bom)
+                         data.monthlyData.sort((a, b) => {
+                             const [m1, y1] = a.month.split('/').map(Number);
+                             const [m2, y2] = b.month.split('/').map(Number);
+                             return (y1 + m1 / 100) - (y2 + m2 / 100);
+                         });
+                    }
+                    monthlyEntry.income += valorRecebido;
+                }
+            });
+        }
     }
-    // Ajustar o card de receita para somar receitas variáveis pagas (apenas valor da parcela)
-    data.income = data.income + totalRendaVariavelRecebida;
-    // Saldo: receitas + renda variável recebida - despesas - reserva
-    data.balance = data.income - data.expenses - data.reserve;
+    
+    // O cálculo do saldo agora só considera income e expenses já atualizados
+    data.balance = data.income - data.expenses; // Reserva já foi subtraída em getDashboardDataBase
+
+    // Filtrar categoryData para remover entradas com amount 0 após as somas/subtrações
+    data.categoryData = data.categoryData.filter(item => item.amount > 0);
+
     return data;
 }
 
@@ -690,6 +727,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // Adicione aqui outros eventos de botões conforme necessário
+
+    // Adicionar event listeners para os cards do dashboard
+    document.getElementById('cardIncome').addEventListener('click', () => showDashboardCardDetailsModal('cardIncome'));
+    document.getElementById('cardExpense').addEventListener('click', () => showDashboardCardDetailsModal('cardExpense'));
+    document.getElementById('cardBalance').addEventListener('click', () => showDashboardCardDetailsModal('cardBalance'));
+    document.getElementById('cardReserve').addEventListener('click', () => showDashboardCardDetailsModal('cardReserve'));
+    document.getElementById('cardVariableIncome').addEventListener('click', () => showDashboardCardDetailsModal('cardVariableIncome'));
 });
 
 function formatMoney(value) {
@@ -1264,4 +1308,208 @@ function updateReportsSummary(data) {
     if (receitas) receitas.textContent = formatMoney(data.income);
     if (despesas) despesas.textContent = formatMoney(data.expenses);
     if (saldo) saldo.textContent = formatMoney(data.balance);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+}
+
+function showDashboardCardDetailsModal(cardId) {
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Detalhes</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="details-list"></div>
+            </div>
+        </div>
+    `;
+
+    const detailsList = modal.querySelector('.details-list');
+    const data = getDashboardData();
+
+    switch(cardId) {
+        case 'cardIncome':
+            // Mostrar receitas fixas
+            const receitas = state.transactions.filter(t => t.type === 'income');
+            if (receitas.length > 0) {
+                detailsList.innerHTML += '<h3>Receitas Fixas</h3>';
+                receitas.forEach(r => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${r.description}</span>
+                            <span class="detail-value income">${formatMoney(r.amount)}</span>
+                            <span class="detail-date">${formatDate(r.date)}</span>
+                        </div>
+                    `;
+                });
+            }
+            break;
+
+        case 'cardExpense':
+            // Mostrar despesas fixas
+            const despesas = state.transactions.filter(t => t.type === 'expense');
+            if (despesas.length > 0) {
+                detailsList.innerHTML += '<h3>Despesas Fixas</h3>';
+                despesas.forEach(d => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${d.description}</span>
+                            <span class="detail-value expense">${formatMoney(d.amount)}</span>
+                            <span class="detail-date">${formatDate(d.date)}</span>
+                        </div>
+                    `;
+                });
+            }
+            // Mostrar despesas fixas não pagas
+            if (state.fixedDebts && state.fixedDebts.length > 0) {
+                const despesasFixas = state.fixedDebts.filter(d => !d.paid);
+                if (despesasFixas.length > 0) {
+                    detailsList.innerHTML += '<h3>Despesas Fixas Pendentes</h3>';
+                    despesasFixas.forEach(d => {
+                        detailsList.innerHTML += `
+                            <div class="detail-item">
+                                <span class="detail-description">${d.description}</span>
+                                <span class="detail-value expense">${formatMoney(d.value)}</span>
+                                <span class="detail-date">${formatDate(d.dueDate)}</span>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            break;
+
+        case 'cardBalance':
+            // Mostrar receitas fixas
+            const receitasSaldo = state.transactions.filter(t => t.type === 'income');
+            if (receitasSaldo.length > 0) {
+                detailsList.innerHTML += '<h3>Receitas Fixas</h3>';
+                receitasSaldo.forEach(r => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${r.description}</span>
+                            <span class="detail-value income">${formatMoney(r.amount)}</span>
+                            <span class="detail-date">${formatDate(r.date)}</span>
+                        </div>
+                    `;
+                });
+            }
+            // Mostrar receitas variáveis pagas
+            if (state.variableIncome && state.variableIncome.length > 0) {
+                const receitasVariaveis = state.variableIncome.filter(r => r.paid);
+                if (receitasVariaveis.length > 0) {
+                    detailsList.innerHTML += '<h3>Receitas Variáveis Recebidas</h3>';
+                    receitasVariaveis.forEach(r => {
+                        const valor = r.installmentValue || r.totalValue;
+                        detailsList.innerHTML += `
+                            <div class="detail-item">
+                                <span class="detail-description">${r.description}</span>
+                                <span class="detail-value income">${formatMoney(valor)}</span>
+                                <span class="detail-date">${formatDate(r.dueDate)}</span>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            // Mostrar despesas fixas
+            const despesasSaldo = state.transactions.filter(t => t.type === 'expense');
+            if (despesasSaldo.length > 0) {
+                detailsList.innerHTML += '<h3>Despesas Fixas</h3>';
+                despesasSaldo.forEach(d => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${d.description}</span>
+                            <span class="detail-value expense">${formatMoney(d.amount)}</span>
+                            <span class="detail-date">${formatDate(d.date)}</span>
+                        </div>
+                    `;
+                });
+            }
+            // Mostrar despesas fixas não pagas
+            if (state.fixedDebts && state.fixedDebts.length > 0) {
+                const despesasFixas = state.fixedDebts.filter(d => !d.paid);
+                if (despesasFixas.length > 0) {
+                    detailsList.innerHTML += '<h3>Despesas Fixas Pendentes</h3>';
+                    despesasFixas.forEach(d => {
+                        detailsList.innerHTML += `
+                            <div class="detail-item">
+                                <span class="detail-description">${d.description}</span>
+                                <span class="detail-value expense">${formatMoney(d.value)}</span>
+                                <span class="detail-date">${formatDate(d.dueDate)}</span>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            break;
+
+        case 'cardReserve':
+            // Mostrar reservas
+            const reservas = state.transactions.filter(t => t.type === 'reserve');
+            if (reservas.length > 0) {
+                detailsList.innerHTML += '<h3>Reservas</h3>';
+                reservas.forEach(r => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${r.description}</span>
+                            <span class="detail-value reserve">${formatMoney(r.amount)}</span>
+                            <span class="detail-date">${formatDate(r.date)}</span>
+                        </div>
+                    `;
+                });
+            }
+            break;
+
+        case 'cardVariableIncome':
+            // Mostrar receitas variáveis pendentes
+            if (state.variableIncome && state.variableIncome.length > 0) {
+                const receitasVariaveisPendentes = state.variableIncome.filter(r => !r.paid);
+                if (receitasVariaveisPendentes.length > 0) {
+                    detailsList.innerHTML += '<h3>Receitas Variáveis Pendentes</h3>';
+                    receitasVariaveisPendentes.forEach(r => {
+                        const valor = r.installmentValue || r.totalValue;
+                        detailsList.innerHTML += `
+                            <div class="detail-item">
+                                <span class="detail-description">${r.description}</span>
+                                <span class="detail-value income">${formatMoney(valor)}</span>
+                                <span class="detail-date">${formatDate(r.dueDate)}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Mostrar receitas variáveis recebidas
+                const receitasVariaveisPagas = state.variableIncome.filter(r => r.paid);
+                if (receitasVariaveisPagas.length > 0) {
+                    detailsList.innerHTML += '<h3>Receitas Variáveis Recebidas</h3>';
+                    receitasVariaveisPagas.forEach(r => {
+                         const valor = r.installmentValue || r.totalValue;
+                        detailsList.innerHTML += `
+                            <div class="detail-item">
+                                <span class="detail-description">${r.description}</span>
+                                <span class="detail-value income">${formatMoney(valor)}</span>
+                                <span class="detail-date">${formatDate(r.dueDate)}</span>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            break;
+    }
+
+    document.body.appendChild(modal);
+    modal.querySelectorAll('.close-modal').forEach(btn => {
+        btn.onclick = () => modal.remove();
+    });
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    };
 }

@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Gestor Financeiro</title>
+    <title>Login - Financial Manager</title>
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
     .support-section {
         text-align: center;
@@ -25,9 +26,9 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-logo">
-                <img src="assets/images/logo.png" alt="Logo Gestor Financeiro">
+                <img src="assets/images/logo.png" alt="Logo Financial Manager">
             </div>
-            <h2>Gestor Financeiro</h2>
+            <h2>Financial Manager</h2>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">E-mail</label>
@@ -37,9 +38,16 @@
                     <label for="password">Senha</label>
                     <input type="password" id="password" required placeholder="Digite sua senha">
                 </div>
+                <div class="form-options">
+                    <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                </div>
                 <button type="submit" class="btn-login">Entrar</button>
                 <div id="loginError" class="login-error"></div>
             </form>
+            <div class="register-section">
+                <p>Não tem uma conta?</p>
+                <button type="button" class="btn-register" id="registerBtn">Criar Conta</button>
+            </div>
             <div class="support-section">
                 <h3>Suporte e Contato</h3>
                 <p><strong>E-mail:</strong> suporte.gestorfinanceiro@gmail.com</p>
