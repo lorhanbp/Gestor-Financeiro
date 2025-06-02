@@ -159,3 +159,29 @@ input[type="email"]:focus, input[type="password"]:focus {
     color: #3a86ff;
     text-decoration: underline;
 }
+
+.live-support-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #43aa8b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 16px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.live-support-btn:hover {
+    background: #3a8f75;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 170, 139, 0.2);
+}
+
+.live-support-btn i {
+    font-size: 1.2em;
+}
