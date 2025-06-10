@@ -21,8 +21,8 @@ let categories = [
     { id: 1, name: 'Rendimento', type: 'income', color: '#4CAF50', icon: 'money-bill-wave' },
     { id: 2, name: 'Moradia', type: 'expense', color: '#F44336', icon: 'home' },
     { id: 3, name: 'Alimentação', type: 'expense', color: '#FF9800', icon: 'utensils' },
-    { id: 4, name: 'Serviços', type: 'expense', color: '#2196F3', icon: 'tools' },
-    { id: 5, name: 'Saúde', type: 'expense', color: '#9C27B0', icon: 'heart' }
+    { id: 4, name: 'Serviços', type: 'expense', color: '#00BCD4', icon: 'tools' },
+    { id: 5, name: 'Saúde', type: 'expense', color: '#8BC34A', icon: 'heart' }
 ];
 
 // API Routes

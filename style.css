@@ -1090,3 +1090,5 @@ body.dark-mode .chartjs-legend li, .dark-mode .chartjs-legend li {
     min-width: 100px;
     text-align: right;
 }
+
+/* Se necessário, adicionar regra para cor da categoria Salário no gráfico */

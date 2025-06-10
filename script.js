@@ -101,14 +101,29 @@ function getDashboardDataBase(transactions = state.transactions) {
 
     // CATEGORIAS DINÂMICAS
     const categoriasUnicas = [...new Set(transactions.map(t => t.category).filter(Boolean))];
-    const colors = ['#4CAF50', '#F44336', '#FF9800', '#2196F3', '#9C27B0', '#FF9F40', '#ffb300', '#e74c3c'];
-    const categoryData = categoriasUnicas.map((cat, i) => ({
-        name: cat,
-        amount: transactions.filter(t => t.category === cat).reduce((sum, t) => sum + t.amount, 0),
-        // Se a categoria for "Outros", use amarelo
-    
-        color: cat === 'Outros' ? '#FFEB3B' : colors[i % colors.length]
-    })).filter(item => item.amount > 0);
+    const categoryData = categoriasUnicas.map((cat) => {
+        const trans = transactions.filter(t => t.category === cat);
+        const amount = trans.reduce((sum, t) => sum + t.amount, 0);
+        let color = '#43aa8b'; // padrão: verde (receita)
+        if (trans.length > 0) {
+            if (trans[0].type === 'expense') {
+                if (cat === 'Alimentação') {
+                    color = '#FF9800';
+                } else if (cat === 'Serviços') {
+                    color = '#4A148C'; // roxo mais escuro
+                } else if (cat === 'Saúde') {
+                    color = '#1976D2'; // azul mais claro
+                } else {
+                    color = '#F44336';
+                }
+            }
+        }
+        return {
+            name: cat,
+            amount: amount,
+            color: color
+        };
+    }).filter(item => item.amount > 0);
 
     // Agrupar por mês/ano
     const monthlyMap = {};
@@ -141,11 +156,15 @@ function getDashboardDataBase(transactions = state.transactions) {
 function getDashboardData(transactions = state.transactions) {
     let data = getDashboardDataBase(transactions);
 
+    // O card de despesas deve mostrar todas as despesas (pagas e não pagas)
+    const todasDespesas = transactions.filter(t => t.type === 'expense');
+    data.expenses = todasDespesas.reduce((sum, t) => sum + t.amount, 0);
+
     // Somar dívidas fixas não pagas às despesas
     if (state.fixedDebts && state.fixedDebts.length > 0) {
         const totalFixasPendentes = state.fixedDebts.filter(d => !d.paid);
         if (totalFixasPendentes.length > 0) {
-             // Adiciona ao total de despesas
+            // Adiciona ao total de despesas
             const valorTotalFixasPendentes = totalFixasPendentes.reduce((sum, d) => sum + d.value, 0);
             data.expenses += valorTotalFixasPendentes;
             // Adiciona ao gráfico de pizza (categoria Dívidas Fixas)
@@ -162,14 +181,14 @@ function getDashboardData(transactions = state.transactions) {
                     const key = `${mes}/${ano.slice(2)}`;
                     let monthlyEntry = data.monthlyData.find(m => m.month === key);
                     if (!monthlyEntry) {
-                         monthlyEntry = { month: key, income: 0, expenses: 0, reserve: 0 };
-                         data.monthlyData.push(monthlyEntry);
-                         // Reordenar para garantir que os meses estejam em ordem (opcional, mas bom)
-                         data.monthlyData.sort((a, b) => {
-                             const [m1, y1] = a.month.split('/').map(Number);
-                             const [m2, y2] = b.month.split('/').map(Number);
-                             return (y1 + m1 / 100) - (y2 + m2 / 100);
-                         });
+                        monthlyEntry = { month: key, income: 0, expenses: 0, reserve: 0 };
+                        data.monthlyData.push(monthlyEntry);
+                        // Reordenar para garantir que os meses estejam em ordem
+                        data.monthlyData.sort((a, b) => {
+                            const [m1, y1] = a.month.split('/').map(Number);
+                            const [m2, y2] = b.month.split('/').map(Number);
+                            return (y1 + m1 / 100) - (y2 + m2 / 100);
+                        });
                     }
                     monthlyEntry.expenses += d.value;
                 }
@@ -191,34 +210,33 @@ function getDashboardData(transactions = state.transactions) {
             if (idxRendaVariavel >= 0) {
                 data.categoryData[idxRendaVariavel].amount += totalRendaVariavelRecebida;
             } else if (totalRendaVariavelRecebida > 0) {
-                // Usar a cor roxa do card
                 data.categoryData.push({ name: 'Receita Variável Recebida', amount: totalRendaVariavelRecebida, color: '#9c27b0' });
             }
 
             // Adiciona ao fluxo mensal (mês de vencimento de cada parcela/total)
             receitasVariaveisPagas.forEach(item => {
-                 if (item.dueDate) {
+                if (item.dueDate) {
                     const [ano, mes] = item.dueDate.split('-');
                     const key = `${mes}/${ano.slice(2)}`;
                     const valorRecebido = item.installmentValue > 0 ? item.installmentValue : 0;
 
                     let monthlyEntry = data.monthlyData.find(m => m.month === key);
                     if (!monthlyEntry) {
-                         monthlyEntry = { month: key, income: 0, expenses: 0, reserve: 0 };
-                         data.monthlyData.push(monthlyEntry);
-                         // Reordenar para garantir que os meses estejam em ordem (opcional, mas bom)
-                         data.monthlyData.sort((a, b) => {
-                             const [m1, y1] = a.month.split('/').map(Number);
-                             const [m2, y2] = b.month.split('/').map(Number);
-                             return (y1 + m1 / 100) - (y2 + m2 / 100);
-                         });
+                        monthlyEntry = { month: key, income: 0, expenses: 0, reserve: 0 };
+                        data.monthlyData.push(monthlyEntry);
+                        // Reordenar para garantir que os meses estejam em ordem
+                        data.monthlyData.sort((a, b) => {
+                            const [m1, y1] = a.month.split('/').map(Number);
+                            const [m2, y2] = b.month.split('/').map(Number);
+                            return (y1 + m1 / 100) - (y2 + m2 / 100);
+                        });
                     }
                     monthlyEntry.income += valorRecebido;
                 }
             });
         }
     }
-    
+
     // O cálculo do saldo agora só considera income e expenses já atualizados
     data.balance = data.income - data.expenses; // Reserva já foi subtraída em getDashboardDataBase
 
@@ -239,12 +257,33 @@ function renderTransactions() {
             <td>${transaction.description}</td>
             <td>${transaction.category}</td>
             <td>${formatDateBR(transaction.date)}</td>
-            <td>
+            <td style="text-align: center;">
+                ${transaction.type === 'expense' ? `
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <input type="checkbox" class="check-paid-expense" data-id="${transaction.id}" ${transaction.paid ? 'checked' : ''}>
+                        <span>Pago</span>
+                    </div>
+                ` : ''}
+            </td>
+            <td style="text-align: center;">
                 <button class="btn-action" onclick="editTransaction(${transaction.id})" title="Editar"><i class="fas fa-pen"></i></button>
                 <button class="btn-action" onclick="deleteTransaction(${transaction.id})"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).join('');
+
+    // Adicionar evento para a caixa de seleção "Pago"
+    tbody.querySelectorAll('.check-paid-expense').forEach(chk => {
+        chk.onchange = (e) => {
+            const id = parseInt(chk.dataset.id);
+            const transaction = state.transactions.find(t => t.id === id);
+            if (transaction) {
+                transaction.paid = chk.checked;
+                saveStateToLocalStorage();
+                updateDashboardUI(getDashboardData());
+            }
+        };
+    });
 }
 
 function deleteTransaction(id) {
@@ -262,25 +301,25 @@ function showAddTransactionModal() {
             <div class="modal-header">
                 <h2>Nova Transação</h2>
                 <button class="close-modal">&times;</button>
-                </div>
+            </div>
             <form id="addTransactionForm">
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Tipo</label>
-                        <select name="type" required>
+                        <select name="type" required id="transactionType">
                             <option value="income">Receita</option>
                             <option value="expense">Despesa</option>
                             <option value="reserve">Reserva</option>
                         </select>
-                </div>
+                    </div>
                     <div class="form-group">
                         <label>Valor</label>
                         <input type="number" name="amount" required min="0.01" step="0.01">
-            </div>
+                    </div>
                     <div class="form-group">
                         <label>Descrição</label>
                         <input type="text" name="description" required>
-            </div>
+                    </div>
                     <div class="form-group">
                         <label>Categoria</label>
                         <select name="category" required>
@@ -291,21 +330,35 @@ function showAddTransactionModal() {
                             <option value="Serviços">Serviços</option>
                             <option value="Saúde">Saúde</option>
                             <option value="Outros">Outros</option>
+                            <option value="Salário">Salário</option>
                         </select>
-            </div>
+                    </div>
                     <div class="form-group">
                         <label>Data</label>
                         <input type="date" name="date" required value="${new Date().toISOString().split('T')[0]}">
-                </div>
+                    </div>
+                    <div class="form-group" id="paidCheckboxGroup" style="display: none;">
+                        <label>
+                            <input type="checkbox" name="paid"> Pago
+                        </label>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar</button>
-            </div>
+                </div>
             </form>
-            </div>
-        `;
+        </div>
+    `;
     document.body.appendChild(modal);
+
+    // Mostrar/esconder caixa de seleção "Pago" baseado no tipo de transação
+    const typeSelect = modal.querySelector('#transactionType');
+    const paidCheckboxGroup = modal.querySelector('#paidCheckboxGroup');
+    typeSelect.onchange = () => {
+        paidCheckboxGroup.style.display = typeSelect.value === 'expense' ? 'block' : 'none';
+    };
+
     modal.querySelectorAll('.close-modal').forEach(btn => {
         btn.onclick = () => modal.remove();
     });
@@ -322,7 +375,8 @@ function showAddTransactionModal() {
             amount: parseFloat(formData.get('amount')),
             description: formData.get('description'),
             category: formData.get('category'),
-            date: formData.get('date')
+            date: formData.get('date'),
+            paid: formData.get('type') === 'expense' ? formData.get('paid') === 'on' : false
         };
         addTransaction(transaction);
         modal.remove();
@@ -335,6 +389,23 @@ function renderLembretesVencimento() {
 
     const hoje = new Date();
     const lembretes = [];
+
+    // Adicionar despesas normais
+    if (state.transactions && state.transactions.length > 0) {
+        state.transactions.forEach(item => {
+            if (item.type === 'expense' && !item.paid && item.date) {
+                const dataVencimento = new Date(item.date);
+                const diasParaVencer = Math.ceil((dataVencimento - hoje) / (1000 * 60 * 60 * 24));
+                lembretes.push({
+                    tipo: 'Despesa',
+                    descricao: item.description,
+                    valor: item.amount,
+                    vencimento: item.date,
+                    dias: diasParaVencer
+                });
+            }
+        });
+    }
 
     // Adicionar despesas fixas (exceto categoria 'Outros')
     if (state.fixedDebts && state.fixedDebts.length > 0) {
@@ -396,6 +467,18 @@ function updateDashboardUI(data, transactions = state.transactions) {
     document.getElementById('dashboardExpense').textContent = formatMoney(data.expenses);
     document.getElementById('dashboardBalance').textContent = formatMoney(data.balance);
     document.getElementById('dashboardReserve').textContent = formatMoney(data.reserve);
+
+    // Novos totais de despesas
+    const despesas = state.transactions.filter(t => t.type === 'expense');
+    const totalDespesas = despesas.reduce((acc, d) => acc + d.amount, 0);
+    const totalDespesasPagas = despesas.filter(d => d.paid).reduce((acc, d) => acc + d.amount, 0);
+    const totalDespesasPendentes = despesas.filter(d => !d.paid).reduce((acc, d) => acc + d.amount, 0);
+    if (document.getElementById('dashboardExpenseTotal'))
+        document.getElementById('dashboardExpenseTotal').textContent = 'Total: ' + formatMoney(totalDespesas);
+    if (document.getElementById('dashboardExpensePaid'))
+        document.getElementById('dashboardExpensePaid').textContent = 'Pagas: ' + formatMoney(totalDespesasPagas);
+    if (document.getElementById('dashboardExpensePending'))
+        document.getElementById('dashboardExpensePending').textContent = 'Pendentes: ' + formatMoney(totalDespesasPendentes);
     
     // Calcular o valor das parcelas do mês atual da renda variável
     const hoje = new Date();
@@ -601,7 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.sidebar nav a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const section = e.target.closest('a').getAttribute('href').substring(1);
+            const section = link.getAttribute('href').substring(1);
             showSection(section);
             if (section === 'variableIncome') renderVariableIncomeTable();
             if (section === 'fixedDebts') renderFixedDebtsTable();
@@ -1239,7 +1322,7 @@ function editTransaction(id) {
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Tipo</label>
-                        <select name="type" required>
+                        <select name="type" required id="transactionType">
                             <option value="income" ${transaction.type === 'income' ? 'selected' : ''}>Receita</option>
                             <option value="expense" ${transaction.type === 'expense' ? 'selected' : ''}>Despesa</option>
                             <option value="reserve" ${transaction.type === 'reserve' ? 'selected' : ''}>Reserva</option>
@@ -1269,6 +1352,11 @@ function editTransaction(id) {
                         <label>Data</label>
                         <input type="date" name="date" required value="${transaction.date}">
                     </div>
+                    <div class="form-group" id="paidCheckboxGroup" style="display: ${transaction.type === 'expense' ? 'block' : 'none'}">
+                        <label>
+                            <input type="checkbox" name="paid" ${transaction.paid ? 'checked' : ''}> Pago
+                        </label>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
@@ -1278,6 +1366,14 @@ function editTransaction(id) {
         </div>
     `;
     document.body.appendChild(modal);
+
+    // Mostrar/esconder caixa de seleção "Pago" baseado no tipo de transação
+    const typeSelect = modal.querySelector('#transactionType');
+    const paidCheckboxGroup = modal.querySelector('#paidCheckboxGroup');
+    typeSelect.onchange = () => {
+        paidCheckboxGroup.style.display = typeSelect.value === 'expense' ? 'block' : 'none';
+    };
+
     modal.querySelectorAll('.close-modal').forEach(btn => {
         btn.onclick = () => modal.remove();
     });
@@ -1294,6 +1390,7 @@ function editTransaction(id) {
         transaction.description = formData.get('description');
         transaction.category = formData.get('category');
         transaction.date = formData.get('date');
+        transaction.paid = formData.get('type') === 'expense' ? formData.get('paid') === 'on' : false;
         saveStateToLocalStorage();
         renderTransactions();
         updateDashboardUI(getDashboardData());
@@ -1362,7 +1459,7 @@ function showDashboardCardDetailsModal(cardId) {
                         <div class="detail-item">
                             <span class="detail-description">${d.description}</span>
                             <span class="detail-value expense">${formatMoney(d.amount)}</span>
-                            <span class="detail-date">${formatDate(d.date)}</span>
+                            <span class="detail-date">${formatDate(d.date)} - <span style=\"color:#fff;font-weight:600;\">${d.paid ? 'Pago' : 'Pendente'}</span></span>
                         </div>
                     `;
                 });
@@ -1427,25 +1524,10 @@ function showDashboardCardDetailsModal(cardId) {
                             <span class="detail-description">${d.description}</span>
                             <span class="detail-value expense">${formatMoney(d.amount)}</span>
                             <span class="detail-date">${formatDate(d.date)}</span>
+                            <span class="detail-status">${d.paid ? '(Pago)' : '(Pendente)'}</span>
                         </div>
                     `;
                 });
-            }
-            // Mostrar despesas fixas não pagas
-            if (state.fixedDebts && state.fixedDebts.length > 0) {
-                const despesasFixas = state.fixedDebts.filter(d => !d.paid);
-                if (despesasFixas.length > 0) {
-                    detailsList.innerHTML += '<h3>Despesas Fixas Pendentes</h3>';
-                    despesasFixas.forEach(d => {
-                        detailsList.innerHTML += `
-                            <div class="detail-item">
-                                <span class="detail-description">${d.description}</span>
-                                <span class="detail-value expense">${formatMoney(d.value)}</span>
-                                <span class="detail-date">${formatDate(d.dueDate)}</span>
-                            </div>
-                        `;
-                    });
-                }
             }
             break;
 
@@ -1489,7 +1571,7 @@ function showDashboardCardDetailsModal(cardId) {
                 if (receitasVariaveisPagas.length > 0) {
                     detailsList.innerHTML += '<h3>Receitas Variáveis Recebidas</h3>';
                     receitasVariaveisPagas.forEach(r => {
-                         const valor = r.installmentValue || r.totalValue;
+                        const valor = r.installmentValue || r.totalValue;
                         detailsList.innerHTML += `
                             <div class="detail-item">
                                 <span class="detail-description">${r.description}</span>
