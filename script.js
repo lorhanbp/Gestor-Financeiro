@@ -113,6 +113,8 @@ function getDashboardDataBase(transactions = state.transactions) {
                     color = '#4A148C'; // roxo mais escuro
                 } else if (cat === 'Saúde') {
                     color = '#1976D2'; // azul mais claro
+                } else if (cat === 'Outros') {
+                    color = '#795548'; // marrom
                 } else {
                     color = '#F44336';
                 }
