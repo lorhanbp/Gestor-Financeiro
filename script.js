@@ -464,6 +464,78 @@ function renderLembretesVencimento() {
     `).join('');
 }
 
+function renderDashboardExtract(transactions = state.transactions) {
+    const extractBody = document.getElementById('dashboardExtractBody');
+    if (!extractBody) return;
+
+    // Função para obter cor da categoria baseada no gráfico
+    function getCategoryColor(category, originalType) {
+        const categoryColors = {
+            'Moradia': '#F44336',
+            'Alimentação': '#FF9800', 
+            'Saúde': '#1976D2',
+            'Serviços': '#4A148C',
+            'Outros': '#795548',
+            'Rendimento': '#43aa8b',
+            'Salário': '#43aa8b',
+            'Dívidas Fixas': '#F44336'
+        };
+        
+        // Se a categoria tem cor específica, usa ela
+        if (categoryColors[category]) {
+            return categoryColors[category];
+        }
+        
+        // Senão, usa cor padrão baseada no tipo
+        return originalType === 'income' ? '#43aa8b' : '#F44336';
+    }
+
+    // Combina transações filtradas e dívidas fixas pendentes
+    let allItems = transactions.map(t => ({
+        type: t.category || (t.type === 'income' ? 'Receita' : 'Despesa'),
+        description: t.description,
+        category: t.category,
+        amount: t.amount,
+        date: t.date,
+        originalType: t.type
+    }));
+
+    const unpaidDebts = state.fixedDebts.filter(d => !d.paid);
+    unpaidDebts.forEach(d => {
+        allItems.push({
+            type: d.category || 'Dívidas Fixas',
+            description: d.description,
+            category: d.category || 'Dívidas Fixas',
+            amount: d.value,
+            date: d.dueDate,
+            originalType: 'expense'
+        });
+    });
+
+    // Ordena por data (mais recente primeiro)
+    allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (allItems.length > 0) {
+        extractBody.innerHTML = allItems.map(item => {
+            const categoryColor = getCategoryColor(item.category, item.originalType);
+            return `
+                <tr>
+                    <td>
+                        <span class="extract-color-indicator" style="background-color: ${categoryColor};"></span>
+                        ${item.type}
+                    </td>
+                    <td>${item.description}</td>
+                    <td>${item.category}</td>
+                    <td class="${item.originalType === 'income' ? 'income' : 'expense'}">${formatMoney(item.amount)}</td>
+                    <td>${formatDateBR(item.date)}</td>
+                </tr>
+            `;
+        }).join('');
+    } else {
+        extractBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Nenhum dado para exibir.</td></tr>`;
+    }
+}
+
 function updateDashboardUI(data, transactions = state.transactions) {
     document.getElementById('dashboardIncome').textContent = formatMoney(data.income);
     document.getElementById('dashboardExpense').textContent = formatMoney(data.expenses);
@@ -515,7 +587,9 @@ function updateDashboardUI(data, transactions = state.transactions) {
     if (rendaVarEl) rendaVarEl.textContent = formatMoney(totalParcelasMes);
     
     updateDashboardCharts(data);
+    updateReportsSummary(data);
     renderLembretesVencimento();
+    renderDashboardExtract(transactions);
 }
 
 function updateDashboardCharts(data) {
@@ -811,6 +885,76 @@ document.addEventListener('DOMContentLoaded', () => {
             window.XLSX.writeFile(wb, 'despesas_fixas.xlsx');
         });
     }
+    // Exportar Relatórios Gerais
+    const exportReportsBtn = document.getElementById('exportReportsBtn');
+    if (exportReportsBtn) {
+        exportReportsBtn.addEventListener('click', () => {
+            // Obter dados do dashboard para o resumo
+            const dashboardData = getDashboardData();
+            
+            // Criar workbook com múltiplas abas
+            const wb = window.XLSX.utils.book_new();
+            
+            // Aba 1: Resumo Financeiro
+            const resumoData = [
+                { 'Métrica': 'Receitas Totais', 'Valor': formatMoney(dashboardData.income) },
+                { 'Métrica': 'Despesas Totais', 'Valor': formatMoney(dashboardData.expenses) },
+                { 'Métrica': 'Saldo', 'Valor': formatMoney(dashboardData.balance) },
+                { 'Métrica': 'Reserva Total', 'Valor': formatMoney(dashboardData.reserve) }
+            ];
+            const wsResumo = window.XLSX.utils.json_to_sheet(resumoData);
+            window.XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo Financeiro');
+            
+            // Aba 2: Transações
+            const transacoesData = state.transactions.map(t => ({
+                'Tipo': t.type === 'income' ? 'Receita' : t.type === 'expense' ? 'Despesa' : 'Reserva',
+                'Valor': formatMoney(t.amount),
+                'Descrição': t.description || '',
+                'Categoria': t.category || '',
+                'Data': formatDateBR(t.date)
+            }));
+            const wsTransacoes = window.XLSX.utils.json_to_sheet(transacoesData);
+            window.XLSX.utils.book_append_sheet(wb, wsTransacoes, 'Transações');
+            
+            // Aba 3: Receita Variável
+            const receitaVariavelData = state.variableIncome.map(r => ({
+                'Descrição': r.description || '',
+                'Valor Total': formatMoney(r.totalValue || 0),
+                'Valor Parcela': formatMoney(r.installmentValue || 0),
+                'Parcelas': r.installments || '',
+                'Vencimento': formatDateBR(r.dueDate),
+                'Pago': r.paid ? 'Sim' : 'Não',
+                'Categoria': r.category || ''
+            }));
+            const wsReceitaVariavel = window.XLSX.utils.json_to_sheet(receitaVariavelData);
+            window.XLSX.utils.book_append_sheet(wb, wsReceitaVariavel, 'Receita Variável');
+            
+            // Aba 4: Despesas Fixas
+            const despesasFixasData = state.fixedDebts.map(d => ({
+                'Descrição': d.description || '',
+                'Valor': formatMoney(d.value || 0),
+                'Vencimento': formatDateBR(d.dueDate),
+                'Pago': d.paid ? 'Sim' : 'Não',
+                'Categoria': d.category || ''
+            }));
+            const wsDespesasFixas = window.XLSX.utils.json_to_sheet(despesasFixasData);
+            window.XLSX.utils.book_append_sheet(wb, wsDespesasFixas, 'Despesas Fixas');
+            
+            // Aba 5: Reservas/Caixas
+            const reservasData = state.reserves.map(r => ({
+                'Caixa': r.name || '',
+                'Valor': formatMoney(r.value || 0),
+                'Descrição': r.description || ''
+            }));
+            const wsReservas = window.XLSX.utils.json_to_sheet(reservasData);
+            window.XLSX.utils.book_append_sheet(wb, wsReservas, 'Reservas');
+            
+            // Gerar arquivo com data atual
+            const hoje = new Date();
+            const dataFormatada = hoje.toISOString().split('T')[0];
+            window.XLSX.writeFile(wb, `relatorio_financeiro_${dataFormatada}.xlsx`);
+        });
+    }
     // Adicione aqui outros eventos de botões conforme necessário
 
     // Adicionar event listeners para os cards do dashboard
@@ -1104,7 +1248,6 @@ function updateUserInfo() {
             const userAvatarEl = document.getElementById('userAvatar');
             if (user) {
                 userNameEl.textContent = user.displayName || 'Usuário';
-                userEmailEl.textContent = user.email || '';
                 userAvatarEl.textContent = (user.displayName ? user.displayName[0] : (user.email ? user.email[0] : '?')).toUpperCase();
             } else {
                 userNameEl.textContent = '';
@@ -1449,8 +1592,21 @@ function showDashboardCardDetailsModal(cardId) {
                     `;
                 });
             }
+            // Mostrar receitas variáveis
+            const receitasVariaveis = state.variableIncome.filter(r => !r.paid);
+            if (receitasVariaveis.length > 0) {
+                detailsList.innerHTML += '<h3>Receitas Variáveis</h3>';
+                receitasVariaveis.forEach(r => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${r.description}</span>
+                            <span class="detail-value income">${formatMoney(r.totalValue)}</span>
+                            <span class="detail-date">${formatDate(r.dueDate)}</span>
+                        </div>
+                    `;
+                });
+            }
             break;
-
         case 'cardExpense':
             // Mostrar despesas fixas
             const despesas = state.transactions.filter(t => t.type === 'expense');
@@ -1461,83 +1617,59 @@ function showDashboardCardDetailsModal(cardId) {
                         <div class="detail-item">
                             <span class="detail-description">${d.description}</span>
                             <span class="detail-value expense">${formatMoney(d.amount)}</span>
-                            <span class="detail-date">${formatDate(d.date)} - <span style=\"color:#fff;font-weight:600;\">${d.paid ? 'Pago' : 'Pendente'}</span></span>
+                            <span class="detail-date">${formatDate(d.date)}</span>
                         </div>
                     `;
                 });
             }
-            // Mostrar despesas fixas não pagas
-            if (state.fixedDebts && state.fixedDebts.length > 0) {
-                const despesasFixas = state.fixedDebts.filter(d => !d.paid);
-                if (despesasFixas.length > 0) {
-                    detailsList.innerHTML += '<h3>Despesas Fixas Pendentes</h3>';
-                    despesasFixas.forEach(d => {
-                        detailsList.innerHTML += `
-                            <div class="detail-item">
-                                <span class="detail-description">${d.description}</span>
-                                <span class="detail-value expense">${formatMoney(d.value)}</span>
-                                <span class="detail-date">${formatDate(d.dueDate)}</span>
-                            </div>
-                        `;
-                    });
-                }
-            }
-            break;
-
-        case 'cardBalance':
-            // Mostrar receitas fixas
-            const receitasSaldo = state.transactions.filter(t => t.type === 'income');
-            if (receitasSaldo.length > 0) {
-                detailsList.innerHTML += '<h3>Receitas Fixas</h3>';
-                receitasSaldo.forEach(r => {
-                    detailsList.innerHTML += `
-                        <div class="detail-item">
-                            <span class="detail-description">${r.description}</span>
-                            <span class="detail-value income">${formatMoney(r.amount)}</span>
-                            <span class="detail-date">${formatDate(r.date)}</span>
-                        </div>
-                    `;
-                });
-            }
-            // Mostrar receitas variáveis pagas
-            if (state.variableIncome && state.variableIncome.length > 0) {
-                const receitasVariaveis = state.variableIncome.filter(r => r.paid);
-                if (receitasVariaveis.length > 0) {
-                    detailsList.innerHTML += '<h3>Receitas Variáveis Recebidas</h3>';
-                    receitasVariaveis.forEach(r => {
-                        const valor = r.installmentValue || r.totalValue;
-                        detailsList.innerHTML += `
-                            <div class="detail-item">
-                                <span class="detail-description">${r.description}</span>
-                                <span class="detail-value income">${formatMoney(valor)}</span>
-                                <span class="detail-date">${formatDate(r.dueDate)}</span>
-                            </div>
-                        `;
-                    });
-                }
-            }
-            // Mostrar despesas fixas
-            const despesasSaldo = state.transactions.filter(t => t.type === 'expense');
-            if (despesasSaldo.length > 0) {
-                detailsList.innerHTML += '<h3>Despesas Fixas</h3>';
-                despesasSaldo.forEach(d => {
+            // Mostrar dívidas fixas não pagas
+            const dividasFixas = state.fixedDebts.filter(d => !d.paid);
+            if (dividasFixas.length > 0) {
+                detailsList.innerHTML += '<h3>Dívidas Fixas Pendentes</h3>';
+                dividasFixas.forEach(d => {
                     detailsList.innerHTML += `
                         <div class="detail-item">
                             <span class="detail-description">${d.description}</span>
-                            <span class="detail-value expense">${formatMoney(d.amount)}</span>
-                            <span class="detail-date">${formatDate(d.date)}</span>
-                            <span class="detail-status">${d.paid ? '(Pago)' : '(Pendente)'}</span>
+                            <span class="detail-value expense">${formatMoney(d.value)}</span>
+                            <span class="detail-date">${formatDate(d.dueDate)}</span>
                         </div>
                     `;
                 });
             }
             break;
-
+        case 'cardBalance':
+            detailsList.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-description">Receitas Totais</span>
+                    <span class="detail-value income">${formatMoney(data.income)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-description">Despesas Totais</span>
+                    <span class="detail-value expense">${formatMoney(data.expenses)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-description">Saldo</span>
+                    <span class="detail-value ${data.balance >= 0 ? 'income' : 'expense'}">${formatMoney(data.balance)}</span>
+                </div>
+            `;
+            break;
         case 'cardReserve':
-            // Mostrar reservas
+            // Mostrar reservas/caixas
+            if (state.reserves.length > 0) {
+                detailsList.innerHTML += '<h3>Caixas</h3>';
+                state.reserves.forEach(r => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${r.name}</span>
+                            <span class="detail-value reserve">${formatMoney(r.value)}</span>
+                        </div>
+                    `;
+                });
+            }
+            // Mostrar transações de reserva
             const reservas = state.transactions.filter(t => t.type === 'reserve');
             if (reservas.length > 0) {
-                detailsList.innerHTML += '<h3>Reservas</h3>';
+                detailsList.innerHTML += '<h3>Transações de Reserva</h3>';
                 reservas.forEach(r => {
                     detailsList.innerHTML += `
                         <div class="detail-item">
@@ -1549,40 +1681,20 @@ function showDashboardCardDetailsModal(cardId) {
                 });
             }
             break;
-
         case 'cardVariableIncome':
-            // Mostrar receitas variáveis pendentes
-            if (state.variableIncome && state.variableIncome.length > 0) {
-                const receitasVariaveisPendentes = state.variableIncome.filter(r => !r.paid);
-                if (receitasVariaveisPendentes.length > 0) {
-                    detailsList.innerHTML += '<h3>Receitas Variáveis Pendentes</h3>';
-                    receitasVariaveisPendentes.forEach(r => {
-                        const valor = r.installmentValue || r.totalValue;
-                        detailsList.innerHTML += `
-                            <div class="detail-item">
-                                <span class="detail-description">${r.description}</span>
-                                <span class="detail-value income">${formatMoney(valor)}</span>
-                                <span class="detail-date">${formatDate(r.dueDate)}</span>
-                            </div>
-                        `;
-                    });
-                }
-
-                // Mostrar receitas variáveis recebidas
-                const receitasVariaveisPagas = state.variableIncome.filter(r => r.paid);
-                if (receitasVariaveisPagas.length > 0) {
-                    detailsList.innerHTML += '<h3>Receitas Variáveis Recebidas</h3>';
-                    receitasVariaveisPagas.forEach(r => {
-                        const valor = r.installmentValue || r.totalValue;
-                        detailsList.innerHTML += `
-                            <div class="detail-item">
-                                <span class="detail-description">${r.description}</span>
-                                <span class="detail-value income">${formatMoney(valor)}</span>
-                                <span class="detail-date">${formatDate(r.dueDate)}</span>
-                            </div>
-                        `;
-                    });
-                }
+            // Mostrar receitas variáveis
+            if (state.variableIncome.length > 0) {
+                detailsList.innerHTML += '<h3>Receitas Variáveis</h3>';
+                state.variableIncome.forEach(r => {
+                    detailsList.innerHTML += `
+                        <div class="detail-item">
+                            <span class="detail-description">${r.description}</span>
+                            <span class="detail-value ${r.paid ? 'expense' : 'income'}">${formatMoney(r.totalValue)}</span>
+                            <span class="detail-date">${formatDate(r.dueDate)}</span>
+                            <span class="detail-status">${r.paid ? 'Pago' : 'Pendente'}</span>
+                        </div>
+                    `;
+                });
             }
             break;
     }
